@@ -77,6 +77,7 @@ class DetailsScreen extends React.Component {
 
   state = {
     cursoDetalhado: [],
+    alunosCadastro: [],
     isLoading: true
   }
 
@@ -89,11 +90,11 @@ class DetailsScreen extends React.Component {
     const response = await fetch(urlCursoDetalhado);
     const responseParsead = await response.json();
 
-    const urlAlunosInscritos = `http://104.248.133.2:7001/cursos/${itemId}`;
+    const urlAlunosInscritos = `http://104.248.133.2:7001/cursos/${itemId}/alunos-inscritos`;
     const responseAlunos = await fetch(urlAlunosInscritos);
     const responseParseadAlunos = await responseAlunos.json();
 
-    this.setState({cursoDetalhado: responseParsead[0], alunosCadastro: responseParseadAlunos[0], isLoading: false })
+    this.setState({cursoDetalhado: responseParsead[0], alunosCadastro: responseParseadAlunos, isLoading: false })
   }
 
 
@@ -117,19 +118,32 @@ class DetailsScreen extends React.Component {
         </View>
 
         <View style={{ marginTop: 10, backgroundColor: '#fff', borderColor: '#ccc', borderWidth: 1, borderRadius: 5, padding: 12}}>
-        <View style={{ backgroundColor: '#bb',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 15}}>
-          <Text>ALUNOS CADASTRADOS</Text>
+          <View style={{ backgroundColor: '#bb',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 15}}>
+            <Text>ALUNOS CADASTRADOS</Text>
+          </View>
         </View>
-          <Text>ALUNOS CADASTRADOS</Text>
-          <Text>Id : {this.state.cursoDetalhado.id}</Text>
-          <Text>Curso : {this.state.cursoDetalhado.nome}</Text>
-          <Text>Professor : {this.state.cursoDetalhado.professor}</Text>
-          <Text>Local : {this.state.cursoDetalhado.local}</Text>
+
+        <View style={{ flex: 1 }}>
+          {this.state.alunosCadastro.map(aluno => {
+            return (
+            <TouchableOpacity
+            key={aluno.nome} style={{ 
+                flexDirection: 'row', 
+                padding: 12, 
+                borderBottomColor: '#ccc', 
+                borderBottomWidth: 1, 
+                alignItems: 'center'
+                }}>
+              <Text style={{ marginLeft: 15, fontSize: 22}}>{aluno.id}</Text>
+              <Text style={{ marginLeft: 15, fontSize: 22}}>{aluno.nome}</Text>
+            </TouchableOpacity>
+              )
+            })}
         </View>
-      </View>
+        </View>
     )
   }
 }
