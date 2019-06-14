@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Alert, TouchableHighlight, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, Alert, TouchableHighlight, TouchableOpacity, ActivityIndicator, Button, TextInput } from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 
 class HomeScreen extends React.Component {
@@ -61,7 +61,7 @@ class HomeScreen extends React.Component {
     );
   }
 }
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class DetailsScreen extends React.Component {
 
   static navigationOptions = {
@@ -78,7 +78,8 @@ class DetailsScreen extends React.Component {
   state = {
     cursoDetalhado: [],
     alunosCadastro: [],
-    isLoading: true
+    isLoading: true,
+    idCurso: null
   }
 
   componentDidMount = async () => {
@@ -94,7 +95,7 @@ class DetailsScreen extends React.Component {
     const responseAlunos = await fetch(urlAlunosInscritos);
     const responseParseadAlunos = await responseAlunos.json();
 
-    this.setState({cursoDetalhado: responseParsead[0], alunosCadastro: responseParseadAlunos, isLoading: false })
+    this.setState({cursoDetalhado: responseParsead[0], alunosCadastro: responseParseadAlunos, isLoading: false , idCurso: itemId})
   }
 
 
@@ -143,9 +144,105 @@ class DetailsScreen extends React.Component {
               )
             })}
         </View>
+        <View>
+          <Button
+            onPress={() => this.props.navigation.navigate('Third', {
+              id: this.state.idCurso
+            })}
+            title="Cadastrar Aluno"
+            color="#FF0000"/>
+        </View>
         </View>
     )
   }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CadastroAlunos extends React.Component {
+
+  static navigationOptions = {
+    title: 'Cadastrar Aluno',
+    headerStyle: {
+      backgroundColor: '#f4511e',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+  };
+
+  urlAlunos = '';
+
+  state = {
+    isLoading: true,
+    cursoId: null
+  }
+
+  componentDidMount = async () => {
+
+    const { navigation } = this.props;
+    const idCurso = navigation.getParam('id');
+
+    urlAlunos = `http://104.248.133.2:7001/cursos/${idCurso}/alunos-inscritos`;
+    const response = await fetch(urlAlunos);
+    const responseParsead = await response.json();
+
+    this.setState({cursos: responseParsead, isLoading: false});
+  }
+
+  cadastrarAluno = async () => {
+
+    const response = await fetch(urlAlunos,{
+      method: 'POST',headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nome: this.state.nome })
+    });
+      
+    if (response.ok) {
+      Alert.alert('Cadastrado com Sucesso!');
+    } else {
+      Alert.alert('Erro!');
+    }
+    return await response.json();
+  }
+
+  render() {
+
+    if (this.state.isLoading) {
+      return (
+        <View>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+      )
+    }
+
+    return (
+      <View style={{ flex: 1, backgroundColor: '#eee', padding: 20}}>
+        <View style={{ marginTop: 10, backgroundColor: '#fff', borderColor: '#ccc', borderWidth: 1, borderRadius: 5, padding: 12}}>
+          <View style={{ backgroundColor: '#bb',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 15}}>
+            <Text>Cadastrar Aluno</Text>
+          </View>
+        </View>
+
+        <View style={{ flex: 1 }}>
+          <Text>Nome: </Text>
+          <TextInput
+              style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+              onChangeText={(nome) => this.setState({nome: nome})}
+              value={this.state.nome}/>
+            <Button
+              onPress={() => { this.cadastrarAluno(); }}
+              title="Cadastrar"
+              color="#841584"/>
+        </View>
+      </View>
+    )
+  }
+
 }
 
 
@@ -155,6 +252,9 @@ const AppNavigator = createStackNavigator({
   },
   Second: {
     screen: DetailsScreen
+  },
+  Third: {
+    screen: CadastroAlunos
   }
 });
 
